@@ -1,0 +1,112 @@
+{
+  "orderId": "ord_100245",
+  "orderNumber": "EU-2025-00010245",
+  "status": "shipped",
+  "createdAt": "2025-12-20T14:22:10Z",
+  "updatedAt": "2025-12-22T09:05:44Z",
+  "currency": "EUR",
+  "customer": {
+    "customerId": "cus_9012",
+    "email": "jane.doe@example.com",
+    "name": {
+      "first": "Jane",
+      "last": "Doe"
+    },
+    "phone": "+49-151-555-0101"
+  },
+  "billingAddress": {
+    "fullName": "Jane Doe",
+    "line1": "Alexanderplatz 1",
+    "line2": "Apt 12",
+    "city": "Berlin",
+    "region": "BE",
+    "postalCode": "10178",
+    "country": "DE"
+  },
+  "shippingAddress": {
+    "fullName": "Jane Doe",
+    "line1": "Alexanderplatz 1",
+    "line2": "Apt 12",
+    "city": "Berlin",
+    "region": "BE",
+    "postalCode": "10178",
+    "country": "DE"
+  },
+  "items": [
+    {
+      "itemId": "itm_1",
+      "productId": "prd_7842",
+      "sku": "TSHIRT-BLK-M",
+      "name": "Basic T-Shirt",
+      "variant": {
+        "size": "M",
+        "color": "Black"
+      },
+      "quantity": 2,
+      "unitPrice": 19.99,
+      "discount": {
+        "type": "percent",
+        "value": 10,
+        "amount": 4.0
+      },
+      "tax": {
+        "rate": 0.19,
+        "amount": 6.84
+      },
+      "lineTotal": 42.82
+    },
+    {
+      "itemId": "itm_2",
+      "productId": "prd_2211",
+      "sku": "MUG-WHT-350",
+      "name": "Ceramic Mug 350ml",
+      "variant": {
+        "capacityMl": 350,
+        "color": "White"
+      },
+      "quantity": 1,
+      "unitPrice": 12.5,
+      "discount": null,
+      "tax": {
+        "rate": 0.19,
+        "amount": 2.38
+      },
+      "lineTotal": 14.88
+    }
+  ],
+  "pricing": {
+    "subtotal": 52.48,
+    "discountTotal": 4.0,
+    "taxTotal": 9.22,
+    "shippingFee": 4.99,
+    "grandTotal": 62.69
+  },
+  "payment": {
+    "paymentId": "pay_7781",
+    "method": "card",
+    "provider": "stripe",
+    "status": "paid",
+    "paidAt": "2025-12-20T14:23:05Z",
+    "amount": 62.69,
+    "card": {
+      "brand": "visa",
+      "last4": "4242",
+      "expMonth": 12,
+      "expYear": 2027
+    }
+  },
+  "fulfillment": {
+    "warehouseId": "wh_berlin_1",
+    "carrier": "DHL",
+    "service": "Paket",
+    "trackingNumber": "00340434123456789012",
+    "shippedAt": "2025-12-21T08:10:00Z",
+    "estimatedDelivery": "2025-12-24",
+    "deliveredAt": null
+  },
+  "notes": "Leave package with concierge if not home.",
+  "metadata": {
+    "channel": "web",
+    "locale": "de-DE",
+    "ipAddress": "203.0.113.10"
+  }
