@@ -1,0 +1,136 @@
+{
+  "endpoint": {
+    "method": "GET",
+    "path": "/api/v1/orders",
+    "description": "Retrieve a paginated list of orders, with optional filtering by status and sorting by date."
+  },
+  "queryParams": [
+    {
+      "name": "page",
+      "type": "integer",
+      "required": false,
+      "default": 1,
+      "constraints": ">= 1",
+      "description": "Page number (1-based)."
+    },
+    {
+      "name": "pageSize",
+      "type": "integer",
+      "required": false,
+      "default": 20,
+      "constraints": "1..100",
+      "description": "Number of orders per page."
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": false,
+      "allowedValues": [
+        "pending",
+        "paid",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded"
+      ],
+      "description": "Filter orders by status."
+    },
+    {
+      "name": "sortBy",
+      "type": "string",
+      "required": false,
+      "default": "date",
+      "allowedValues": [
+        "date"
+      ],
+      "description": "Sort field (only date supported for this endpoint)."
+    },
+    {
+      "name": "sortOrder",
+      "type": "string",
+      "required": false,
+      "default": "desc",
+      "allowedValues": [
+        "asc",
+        "desc"
+      ],
+      "description": "Sort direction."
+    }
+  ],
+  "examples": {
+    "requestUrls": [
+      "/api/v1/orders?page=1&pageSize=20",
+      "/api/v1/orders?page=2&pageSize=10&status=shipped",
+      "/api/v1/orders?page=1&pageSize=25&status=paid&sortBy=date&sortOrder=asc"
+    ]
+  },
+  "responses": {
+    "200": {
+      "description": "Orders retrieved successfully.",
+      "body": {
+        "data": [
+          {
+            "orderId": "ord_100245",
+            "status": "shipped",
+            "createdAt": "2025-12-20T14:22:10Z",
+            "updatedAt": "2025-12-22T09:05:44Z",
+            "totalAmount": 129.99,
+            "currency": "EUR",
+            "customer": {
+              "customerId": "cus_9012",
+              "name": "Jane Doe"
+            },
+            "itemsCount": 3
+          },
+          {
+            "orderId": "ord_100244",
+            "status": "paid",
+            "createdAt": "2025-12-19T10:11:02Z",
+            "updatedAt": "2025-12-19T10:15:40Z",
+            "totalAmount": 49.5,
+            "currency": "EUR",
+            "customer": {
+              "customerId": "cus_1255",
+              "name": "Mark Smith"
+            },
+            "itemsCount": 1
+          }
+        ],
+        "pagination": {
+          "page": 1,
+          "pageSize": 20,
+          "totalItems": 87,
+          "totalPages": 5,
+          "hasNext": true,
+          "hasPrev": false
+        },
+        "sorting": {
+          "sortBy": "date",
+          "sortOrder": "desc"
+        },
+        "filtering": {
+          "status": "shipped"
+        }
+      }
+    },
+    "400": {
+      "description": "Invalid query parameter(s).",
+      "body": {
+        "error": {
+          "code": "BAD_REQUEST",
+          "message": "Invalid query parameters.",
+          "details": [
+            {
+              "field": "pageSize",
+              "issue": "Must be between 1 and 100."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "notes": [
+    "Sorting by date uses createdAt by default.",
+    "If status is not provided, all statuses are included."
+  ]
+}
