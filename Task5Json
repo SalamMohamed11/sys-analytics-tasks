@@ -1,0 +1,86 @@
+{
+  "endpoint": {
+    "method": "PATCH",
+    "path": "/api/v1/orders/status:bulk",
+    "description": "Mass update the status of multiple orders in one request."
+  },
+  "body": {
+    "orderIds": ["ord_100245", "ord_100244", "ord_100199"],
+    "newStatus": "shipped",
+    "reason": "Batch shipped from warehouse WH-1",
+    "idempotencyKey": "b8a2d4c6-1a1b-4e6f-9c2e-7a6e0d1c3f21"
+  },
+  "rules": [
+    "orderIds must contain 1..500 ids.",
+    "newStatus must be one of: pending, paid, shipped, delivered, cancelled, refunded.",
+    "Server validates allowed transitions (e.g., delivered -> shipped is not allowed).",
+    "Operation is idempotent when idempotencyKey is reused with the same payload.",
+    "Supports partial success: some orders may update while others fail."
+  ],
+  "responses": {
+    "200": {
+      "description": "Bulk update completed (may contain partial failures).",
+      "body": {
+        "jobId": "job_77a91c",
+        "summary": {
+          "requested": 3,
+          "updated": 2,
+          "failed": 1
+        },
+        "results": [
+          {
+            "orderId": "ord_100245",
+            "statusBefore": "paid",
+            "statusAfter": "shipped",
+            "updatedAt": "2025-12-27T12:10:00Z"
+          },
+          {
+            "orderId": "ord_100244",
+            "statusBefore": "paid",
+            "statusAfter": "shipped",
+            "updatedAt": "2025-12-27T12:10:00Z"
+          },
+          {
+            "orderId": "ord_100199",
+            "error": {
+              "httpStatus": 409,
+              "code": "INVALID_STATUS_TRANSITION",
+              "internalCode": "ORD-BULK-409",
+              "message": "Cannot change status from delivered to shipped."
+            }
+          }
+        ]
+      }
+    },
+    "400": {
+      "description": "Bad request (payload invalid).",
+      "body": {
+        "error": {
+          "httpStatus": 400,
+          "code": "BAD_REQUEST",
+          "internalCode": "ORD-BULK-400",
+          "message": "Invalid request body.",
+          "details": [
+            {
+              "field": "orderIds",
+              "issue": "OUT_OF_RANGE",
+              "internalCode": "ORD-BULK-401",
+              "message": "orderIds must contain between 1 and 500 values."
+            }
+          ]
+        }
+      }
+    },
+    "401": {
+      "description": "Unauthorized.",
+      "body": {
+        "error": {
+          "httpStatus": 401,
+          "code": "UNAUTHORIZED",
+          "internalCode": "ORD-BULK-401A",
+          "message": "Missing or invalid access token."
+        }
+      }
+    }
+  }
+}
