@@ -1,0 +1,115 @@
+{
+  "endpoint": {
+    "method": "GET",
+    "path": "/api/v1/products",
+    "description": "List products with advanced filtering by price, category, and brand using logical operators."
+  },
+  "filtering": {
+    "style": "Single 'filter' query parameter using a structured JSON filter expression (URL-encoded).",
+    "allowedFields": ["price", "categoryId", "brandId"],
+    "operators": {
+      "comparison": ["eq", "ne", "gt", "gte", "lt", "lte", "in"],
+      "logical": ["and", "or", "not"]
+    }
+  },
+  "queryParams": [
+    {
+      "name": "filter",
+      "type": "string",
+      "required": false,
+      "description": "URL-encoded JSON expression with logical operators."
+    },
+    {
+      "name": "page",
+      "type": "integer",
+      "default": 1,
+      "constraints": ">= 1"
+    },
+    {
+      "name": "pageSize",
+      "type": "integer",
+      "default": 20,
+      "constraints": "1..100"
+    },
+    {
+      "name": "sort",
+      "type": "string",
+      "default": "createdAt:desc",
+      "examples": ["price:asc", "price:desc", "name:asc"]
+    }
+  ],
+  "filterExpressionExamples": {
+    "A_price_between_50_and_200_AND_category_in_two": {
+      "json": {
+        "and": [
+          { "field": "price", "op": "gte", "value": 50 },
+          { "field": "price", "op": "lte", "value": 200 },
+          { "field": "categoryId", "op": "in", "value": ["cat_shoes", "cat_sneakers"] }
+        ]
+      },
+      "urlExample": "/api/v1/products?filter=%7B%22and%22%3A%5B%7B%22field%22%3A%22price%22%2C%22op%22%3A%22gte%22%2C%22value%22%3A50%7D%2C%7B%22field%22%3A%22price%22%2C%22op%22%3A%22lte%22%2C%22value%22%3A200%7D%2C%7B%22field%22%3A%22categoryId%22%2C%22op%22%3A%22in%22%2C%22value%22%3A%5B%22cat_shoes%22%2C%22cat_sneakers%22%5D%7D%5D%7D"
+    },
+    "B_brand_is_nike_OR_adidas_AND_price_lt_100": {
+      "json": {
+        "and": [
+          {
+            "or": [
+              { "field": "brandId", "op": "eq", "value": "br_nike" },
+              { "field": "brandId", "op": "eq", "value": "br_adidas" }
+            ]
+          },
+          { "field": "price", "op": "lt", "value": 100 }
+        ]
+      },
+      "urlExample": "/api/v1/products?filter=%7B%22and%22%3A%5B%7B%22or%22%3A%5B%7B%22field%22%3A%22brandId%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22br_nike%22%7D%2C%7B%22field%22%3A%22brandId%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22br_adidas%22%7D%5D%7D%2C%7B%22field%22%3A%22price%22%2C%22op%22%3A%22lt%22%2C%22value%22%3A100%7D%5D%7D"
+    },
+    "C_NOT_brand_apple_AND_category_phones": {
+      "json": {
+        "and": [
+          { "not": { "field": "brandId", "op": "eq", "value": "br_apple" } },
+          { "field": "categoryId", "op": "eq", "value": "cat_phones" }
+        ]
+      },
+      "urlExample": "/api/v1/products?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22field%22%3A%22brandId%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22br_apple%22%7D%7D%2C%7B%22field%22%3A%22categoryId%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22cat_phones%22%7D%5D%7D"
+    }
+  },
+  "response": {
+    "200": {
+      "data": [
+        {
+          "productId": "prd_7842",
+          "name": "Basic T-Shirt",
+          "price": 19.99,
+          "currency": "EUR",
+          "categoryId": "cat_tshirts",
+          "brandId": "br_basic",
+          "createdAt": "2025-10-01T09:00:00Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "pageSize": 20,
+        "totalItems": 342,
+        "totalPages": 18,
+        "hasNext": true,
+        "hasPrev": false
+      }
+    },
+    "400": {
+      "error": {
+        "httpStatus": 400,
+        "code": "BAD_FILTER",
+        "internalCode": "PRD-FLT-400",
+        "message": "Filter expression is invalid.",
+        "details": [
+          {
+            "field": "filter",
+            "issue": "UNKNOWN_OPERATOR",
+            "internalCode": "PRD-FLT-401",
+            "message": "Operator 'between' is not supported. Use gte/lte."
+          }
+        ]
+      }
+    }
+  }
+}
