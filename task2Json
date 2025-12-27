@@ -1,0 +1,177 @@
+{
+  "base": {
+    "resource": "articles",
+    "commentResource": "comments",
+    "principle": "Hierarchical (nested) endpoints: comments belong to an article; replies belong to a parent comment."
+  },
+  "endpoints": [
+    {
+      "name": "List top-level comments for an article",
+      "method": "GET",
+      "path": "/api/v1/articles/{articleId}/comments",
+      "queryParams": [
+        { "name": "page", "type": "integer", "default": 1, "constraints": ">= 1" },
+        { "name": "pageSize", "type": "integer", "default": 20, "constraints": "1..100" },
+        {
+          "name": "sort",
+          "type": "string",
+          "default": "createdAt:desc",
+          "allowedValues": ["createdAt:asc", "createdAt:desc", "likes:desc"]
+        }
+      ],
+      "description": "Returns only top-level comments (parentCommentId = null) for a given article."
+    },
+    {
+      "name": "Create a top-level comment on an article",
+      "method": "POST",
+      "path": "/api/v1/articles/{articleId}/comments",
+      "body": {
+        "content": "string (1..5000)",
+        "author": { "userId": "string" }
+      },
+      "description": "Creates a new top-level comment for the article."
+    },
+    {
+      "name": "Get a single comment (scoped to article)",
+      "method": "GET",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}",
+      "description": "Returns a comment that belongs to the specified article."
+    },
+    {
+      "name": "Update a comment",
+      "method": "PATCH",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}",
+      "body": {
+        "content": "string (1..5000)"
+      },
+      "description": "Edits the comment content (author/moderator only)."
+    },
+    {
+      "name": "Delete a comment",
+      "method": "DELETE",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}",
+      "description": "Deletes or soft-deletes a comment (author/moderator only)."
+    },
+    {
+      "name": "List replies to a comment",
+      "method": "GET",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}/replies",
+      "queryParams": [
+        { "name": "page", "type": "integer", "default": 1, "constraints": ">= 1" },
+        { "name": "pageSize", "type": "integer", "default": 20, "constraints": "1..100" },
+        {
+          "name": "sort",
+          "type": "string",
+          "default": "createdAt:asc",
+          "allowedValues": ["createdAt:asc", "createdAt:desc"]
+        }
+      ],
+      "description": "Returns direct child comments (replies) of the given comment."
+    },
+    {
+      "name": "Create a reply to a comment",
+      "method": "POST",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}/replies",
+      "body": {
+        "content": "string (1..5000)",
+        "author": { "userId": "string" }
+      },
+      "description": "Creates a reply where parentCommentId = {commentId}."
+    },
+    {
+      "name": "Get full thread (optional convenience endpoint)",
+      "method": "GET",
+      "path": "/api/v1/articles/{articleId}/comments/thread",
+      "queryParams": [
+        { "name": "depth", "type": "integer", "default": 3, "constraints": "1..10" },
+        { "name": "sort", "type": "string", "default": "createdAt:asc", "allowedValues": ["createdAt:asc", "createdAt:desc"] }
+      ],
+      "description": "Returns comments as a tree up to the specified depth."
+    },
+    {
+      "name": "React to a comment (like/dislike)",
+      "method": "POST",
+      "path": "/api/v1/articles/{articleId}/comments/{commentId}/reactions",
+      "body": {
+        "type": "like"
+      },
+      "description": "Adds a reaction to a comment by the current user."
+    }
+  ],
+  "examples": {
+    "requests": [
+      {
+        "title": "List comments",
+        "url": "/api/v1/articles/art_123/comments?page=1&pageSize=20&sort=createdAt:desc"
+      },
+      {
+        "title": "Post a comment",
+        "url": "/api/v1/articles/art_123/comments",
+        "body": { "content": "Nice article!", "author": { "userId": "usr_9" } }
+      },
+      {
+        "title": "Post a reply",
+        "url": "/api/v1/articles/art_123/comments/cmt_55/replies",
+        "body": { "content": "Agreed 👍", "author": { "userId": "usr_10" } }
+      }
+    ]
+  },
+  "responseShapes": {
+    "comment": {
+      "commentId": "cmt_55",
+      "articleId": "art_123",
+      "parentCommentId": null,
+      "content": "string",
+      "author": { "userId": "usr_9", "displayName": "string" },
+      "createdAt": "2025-12-27T10:12:00Z",
+      "updatedAt": "2025-12-27T10:12:00Z",
+      "stats": { "likes": 12, "replies": 4 },
+      "isDeleted": false
+    },
+    "paginatedList": {
+      "data": ["<comment>", "<comment>"],
+      "pagination": {
+        "page": 1,
+        "pageSize": 20,
+        "totalItems": 120,
+        "totalPages": 6,
+        "hasNext": true,
+        "hasPrev": false
+      }
+    },
+    "threadTree": {
+      "articleId": "art_123",
+      "depth": 3,
+      "data": [
+        {
+          "commentId": "cmt_1",
+          "parentCommentId": null,
+          "content": "Top-level comment",
+          "children": [
+            {
+              "commentId": "cmt_2",
+              "parentCommentId": "cmt_1",
+              "content": "Reply",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "errors": {
+    "400": {
+      "code": "BAD_REQUEST",
+      "message": "Invalid request.",
+      "details": [{ "field": "content", "issue": "Must be 1..5000 characters." }]
+    },
+    "404": {
+      "code": "NOT_FOUND",
+      "message": "Article or comment not found for the given IDs."
+    },
+    "409": {
+      "code": "CONFLICT",
+      "message": "Comment does not belong to the specified article."
+    }
+  }
+}
