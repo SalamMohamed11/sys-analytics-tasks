@@ -1,0 +1,121 @@
+{
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/v1/orders",
+    "description": "Create a new order"
+  },
+  "errorModel": {
+    "httpStatus": 422,
+    "body": {
+      "error": {
+        "httpStatus": 422,
+        "code": "VALIDATION_ERROR",
+        "internalCode": "ORD-VAL-001",
+        "message": "Validation failed for the request body.",
+        "correlationId": "c8e5b3a2-8f9f-4f86-9a3d-3d4f1b2e9e10",
+        "timestamp": "2025-12-27T12:00:00Z",
+        "details": [
+          {
+            "field": "customer.email",
+            "issue": "INVALID_EMAIL",
+            "internalCode": "ORD-VAL-101",
+            "message": "Email must be a valid address."
+          },
+          {
+            "field": "items",
+            "issue": "EMPTY_LIST",
+            "internalCode": "ORD-VAL-201",
+            "message": "Order must contain at least 1 item."
+          },
+          {
+            "field": "items[0].quantity",
+            "issue": "OUT_OF_RANGE",
+            "internalCode": "ORD-VAL-203",
+            "message": "Quantity must be between 1 and 999."
+          },
+          {
+            "field": "shippingAddress.postalCode",
+            "issue": "REQUIRED",
+            "internalCode": "ORD-VAL-301",
+            "message": "Postal code is required."
+          }
+        ]
+      }
+    }
+  },
+  "internalCodesCatalog": [
+    {
+      "internalCode": "ORD-VAL-001",
+      "meaning": "Generic validation failure (one or more fields invalid)."
+    },
+    {
+      "internalCode": "ORD-VAL-101",
+      "meaning": "Customer email is invalid format."
+    },
+    {
+      "internalCode": "ORD-VAL-102",
+      "meaning": "Customer email is required but missing."
+    },
+    {
+      "internalCode": "ORD-VAL-103",
+      "meaning": "Customer phone is invalid format."
+    },
+    {
+      "internalCode": "ORD-VAL-201",
+      "meaning": "Items list is missing or empty."
+    },
+    {
+      "internalCode": "ORD-VAL-202",
+      "meaning": "Item productId/sku missing or invalid."
+    },
+    {
+      "internalCode": "ORD-VAL-203",
+      "meaning": "Item quantity is invalid (<=0 or too large)."
+    },
+    {
+      "internalCode": "ORD-VAL-204",
+      "meaning": "Item unitPrice is invalid (negative or not a number)."
+    },
+    {
+      "internalCode": "ORD-VAL-205",
+      "meaning": "Duplicate items (same sku) not allowed (if enforced)."
+    },
+    {
+      "internalCode": "ORD-VAL-301",
+      "meaning": "Shipping address required field missing/invalid."
+    },
+    {
+      "internalCode": "ORD-VAL-302",
+      "meaning": "Billing address required field missing/invalid."
+    },
+    {
+      "internalCode": "ORD-VAL-303",
+      "meaning": "Shipping country not supported."
+    },
+    {
+      "internalCode": "ORD-VAL-401",
+      "meaning": "Currency not supported."
+    },
+    {
+      "internalCode": "ORD-VAL-402",
+      "meaning": "Totals do not match server-calculated totals (if client sends totals)."
+    }
+  ],
+  "example": {
+    "badRequestBody": {
+      "customer": {
+        "email": "not-an-email"
+      },
+      "items": [
+        {
+          "productId": "prd_7842",
+          "quantity": 0
+        }
+      ],
+      "shippingAddress": {
+        "city": "Berlin",
+        "country": "DE"
+      }
+    }
+  }
+}
