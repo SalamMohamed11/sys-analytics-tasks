@@ -1,0 +1,103 @@
+{
+  "endpoint": {
+    "method": "GET",
+    "path": "/api/v1/chats/{chatId}/messages",
+    "description": "List chat messages using cursor-based pagination (stable for inserts/deletes)."
+  },
+  "queryParams": [
+    {
+      "name": "limit",
+      "type": "integer",
+      "required": false,
+      "default": 50,
+      "constraints": "1..100",
+      "description": "Max number of messages to return."
+    },
+    {
+      "name": "cursor",
+      "type": "string",
+      "required": false,
+      "description": "Opaque cursor from the previous response (base64-encoded)."
+    },
+    {
+      "name": "direction",
+      "type": "string",
+      "required": false,
+      "default": "backward",
+      "allowedValues": ["backward", "forward"],
+      "description": "Pagination direction relative to cursor."
+    }
+  ],
+  "ordering": {
+    "default": "Newest first",
+    "serverRule": "Results are ordered by createdAt DESC, tie-breaker by messageId DESC.",
+    "cursorContents": "base64(json({ createdAt, messageId, direction }))"
+  },
+  "examples": {
+    "firstPageNewest": "/api/v1/chats/chat_123/messages?limit=50",
+    "nextPageOlder": "/api/v1/chats/chat_123/messages?limit=50&cursor=eyJjcmVhdGVkQXQiOiIyMDI1LTEyLTI3VDEyOjAwOjAwWiIsIm1lc3NhZ2VJZCI6Im1zZ18wMDAxMCIsImRpcmVjdGlvbiI6ImJhY2t3YXJkIn0%3D&direction=backward",
+    "pageNewerFromCursor": "/api/v1/chats/chat_123/messages?limit=50&cursor=eyJjcmVhdGVkQXQiOiIyMDI1LTEyLTI3VDEyOjAwOjAwWiIsIm1lc3NhZ2VJZCI6Im1zZ18wMDAxMCIsImRpcmVjdGlvbiI6ImZvcndhcmQifQ%3D%3D&direction=forward"
+  },
+  "response": {
+    "200": {
+      "body": {
+        "data": [
+          {
+            "messageId": "msg_00012",
+            "chatId": "chat_123",
+            "sender": {
+              "userId": "usr_9",
+              "displayName": "Jane"
+            },
+            "type": "text",
+            "text": "Are you coming today?",
+            "createdAt": "2025-12-27T12:05:10Z",
+            "editedAt": null
+          },
+          {
+            "messageId": "msg_00011",
+            "chatId": "chat_123",
+            "sender": {
+              "userId": "usr_10",
+              "displayName": "Mark"
+            },
+            "type": "text",
+            "text": "Yep, in 10 mins.",
+            "createdAt": "2025-12-27T12:04:02Z",
+            "editedAt": null
+          }
+        ],
+        "page": {
+          "limit": 50,
+          "hasNext": true,
+          "hasPrev": false,
+          "nextCursor": "eyJjcmVhdGVkQXQiOiIyMDI1LTEyLTI3VDEyOjA0OjAyWiIsIm1lc3NhZ2VJZCI6Im1zZ18wMDAxMSIsImRpcmVjdGlvbiI6ImJhY2t3YXJkIn0=",
+          "prevCursor": null
+        }
+      }
+    },
+    "400": {
+      "body": {
+        "error": {
+          "httpStatus": 400,
+          "code": "BAD_REQUEST",
+          "internalCode": "CHAT-CUR-400",
+          "message": "Invalid cursor or pagination parameters.",
+          "details": [
+            {
+              "field": "cursor",
+              "issue": "INVALID_FORMAT",
+              "internalCode": "CHAT-CUR-401",
+              "message": "Cursor must be a valid base64-encoded value."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "serverNotes": [
+    "Cursor is opaque: clients must not parse/modify it.",
+    "Use (createdAt, messageId) as a composite key to avoid duplicates when timestamps collide.",
+    "If direction=backward, fetch messages older than the cursor; if direction=forward, fetch messages newer than the cursor."
+  ]
+}
